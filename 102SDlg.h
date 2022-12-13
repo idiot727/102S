@@ -53,4 +53,9 @@ public:
 
 	CSerialPort m_SerialPort;
 	CStatic m_RadarInfo;
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+
+	CBrush m_Brush;
+	CBrush m_Brush_white;
+	CFont m_Font;
 };

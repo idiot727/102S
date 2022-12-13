@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(CMy102SDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &CMy102SDlg::OnBnClickedButtonRefresh)
 	
 	ON_WM_TIMER()
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 
@@ -73,6 +74,18 @@ BOOL CMy102SDlg::OnInitDialog()
 	m_PortNr.SetCurSel(0);
 
 	m_SerialPort.connectReadEvent(this);
+
+
+	m_Font.CreatePointFont(500, _T("Times New Roman"));
+	
+	m_Brush.CreateSolidBrush(GetSysColor(COLOR_3DFACE));
+
+	m_Brush_white.CreateSolidBrush(RGB(255, 255, 255));
+
+
+	m_RadarInfo.SetWindowTextW(_T(" 0 cm "));
+
+	
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -184,6 +197,15 @@ void CMy102SDlg::OnBnClickedButtonRefresh()
 
 int CMy102SDlg::onRadarInfo(const char* buffer, int len)
 {
+	char head = 0xaa;
+	if (buffer[0] == head)
+	{
+		
+		short b;
+		size_t size = sizeof(b);
+		memcpy(&b, &buffer[1],size);
+		return b;
+	}
 	return 0;
 }
 
@@ -201,7 +223,7 @@ void CMy102SDlg::onReadEvent(const char* portName, unsigned int readBufferLen)
 			if (recLen > 0)
 			{
 				CString str2;
-				str2.Format(_T("%d"), onRadarInfo(data, recLen));
+				str2.Format(_T(" %d CM "), onRadarInfo(data, recLen));
 				this->m_RadarInfo.SetWindowTextW(str2);
 				/*	data[recLen] = '\0';
 
@@ -258,3 +280,46 @@ void CMy102SDlg::onReadEvent(const char* portName, unsigned int readBufferLen)
 //}
 
 
+
+
+HBRUSH CMy102SDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	CWnd* p = NULL;
+
+
+	// TODO:  在此更改 DC 的任何特性
+
+	// TODO:  如果默认的不是所需画笔，则返回另一个画笔
+
+	CRect rc;
+	if (pWnd->GetDlgCtrlID() == IDC_STATIC8)
+	{
+		
+		pDC->SetTextColor(RGB(0, 0, 0));//
+		pDC->SetBkColor(RGB(255, 255, 255));//
+		pDC->SelectObject(&m_Font);//文字为初始化文字
+
+		//m_Brush_white.DeleteObject();
+		//m_Brush_white.CreateSolidBrush(RGB(0,0,0));
+		
+		return m_Brush;
+
+	}
+
+	if (pWnd->GetDlgCtrlID() == IDC_STATIC6)
+	{
+		
+		pDC->SetTextColor(RGB(0, 0, 0));//
+		pDC->SetBkColor(RGB(255, 255, 255));//
+		//p = pWnd->GetDlgItem(IDC_STATIC6);
+		
+		pWnd->GetClientRect(&rc);
+		pDC->FillSolidRect(rc, RGB(255, 255, 255));
+
+		return m_Brush_white;
+
+	}
+	return hbr;
+}
