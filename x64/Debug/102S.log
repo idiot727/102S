@@ -1,1 +1,12 @@
-﻿
+﻿  102SDlg.cpp
+E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(70,77): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(71,82): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(90,17): warning C4244: “*=”: 从“double”转换到“LONG”，可能丢失数据
+E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(214,77): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(215,82): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(227,14): warning C4309: “初始化”: 截断常量值
+E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(429,23): warning C4244: “*=”: 从“float”转换到“LONG”，可能丢失数据
+E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(430,23): warning C4244: “*=”: 从“float”转换到“LONG”，可能丢失数据
+E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(434,23): warning C4244: “*=”: 从“float”转换到“LONG”，可能丢失数据
+E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(435,23): warning C4244: “*=”: 从“float”转换到“LONG”，可能丢失数据
+  102S.vcxproj -> E:\private\JGDZ\101-Dis\102S\x64\Debug\102S.exe

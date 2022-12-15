@@ -79,13 +79,22 @@ BOOL CMy102SDlg::OnInitDialog()
 	m_SerialPort.connectReadEvent(this);
 
 
-	m_Font.CreatePointFont(400, _T("Times New Roman"));
+	//m_Font.CreatePointFont(250, _T("Times New Roman"));
+	//m_FontMax.CreatePointFont(500, _T("Times New Roman"));
+
+	CFont* cf = GetFont();
+
+	LOGFONT lf;
+	cf->GetLogFont(&lf);
+	m_FontDialog.CreateFontIndirectW(&lf);
+	lf.lfHeight *= 2.5;
+	m_Font.CreateFontIndirectW(&lf);
+
 
 	m_Brush.CreateSolidBrush(GetSysColor(COLOR_3DFACE));
-
 	m_Brush_white.CreateSolidBrush(RGB(255, 255, 255));
 
-
+	m_RadarInfo.ModifyStyle(0, SS_CENTER);
 	m_RadarInfo.SetWindowTextW(_T(" 0 cm "));
 
 	bConn = FALSE;
@@ -98,6 +107,8 @@ BOOL CMy102SDlg::OnInitDialog()
 	Old.x = rect.right - rect.left;
 
 	Old.y = rect.bottom - rect.top;
+
+	m_bStatus = FALSE;
 
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -245,6 +256,11 @@ void CMy102SDlg::onReadEvent(const char* portName, unsigned int readBufferLen)
 				CString str2;
 				str2.Format(_T(" %d CM "), onRadarInfo(data, recLen));
 				this->m_RadarInfo.SetWindowTextW(str2);
+				CRect rc;
+				m_RadarInfo.GetWindowRect(&rc);
+				ScreenToClient(&rc);
+				InvalidateRect(&rc);
+
 				/*	data[recLen] = '\0';
 
 					CString str1(data);
@@ -319,9 +335,13 @@ HBRUSH CMy102SDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	if (pWnd->GetDlgCtrlID() == IDC_STATIC8)
 	{
 
+
 		pDC->SetTextColor(RGB(0, 0, 0));//
 		pDC->SetBkColor(RGB(255, 255, 255));//
-		pDC->SelectObject(&m_Font);//文字为初始化文字
+		if (m_bStatus)
+			pDC->SelectObject(&m_FontMax);
+		else
+			pDC->SelectObject(&m_Font);//文字为初始化文字
 
 		//m_Brush_white.DeleteObject();
 		//m_Brush_white.CreateSolidBrush(RGB(0,0,0));
@@ -351,11 +371,11 @@ HBRUSH CMy102SDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 void CMy102SDlg::OnBnClickedButton5()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	if (!bShow&&bConn) {
+	if (!bShow && bConn) {
 		this->m_StartPause.SetWindowTextW(_T("暂停"));
 		bShow = TRUE;
 	}
-	else if(bShow){
+	else if (bShow) {
 		bShow = FALSE;
 		this->m_StartPause.SetWindowTextW(_T("开始"));
 	}
@@ -365,14 +385,16 @@ void CMy102SDlg::OnBnClickedButton5()
 void CMy102SDlg::OnSize(UINT nType, int cx, int cy)
 {
 	__super::OnSize(nType, cx, cy);
-	return;
+	//return;
 
-	if (nType == SIZE_RESTORED){ 
+	if (nType == SIZE_RESTORED) {
 		ChangeCtrlSize(0);
+		m_bStatus = FALSE;
 		//this->ChangeSize(cx, cy);
 	}
 	if (nType == SIZE_MAXIMIZED) {
 		ChangeCtrlSize(1);
+		m_bStatus = TRUE;
 	}
 
 
@@ -401,6 +423,21 @@ void CMy102SDlg::ChangeCtrlSize(BOOL bMax)
 
 	fsp[1] = (float)Newp.y / Old.y;
 
+	if (bMax) {
+		LOGFONT lf;
+		m_FontDialog.GetLogFont(&lf);
+		lf.lfWeight *= fsp[0];
+		lf.lfHeight *= fsp[1];
+		if(m_FontDialogMax.GetSafeHandle() == NULL)
+			m_FontDialogMax.CreateFontIndirectW(&lf);
+		m_Font.GetLogFont(&lf);
+		lf.lfWeight *= fsp[0];
+		lf.lfHeight *= fsp[1];
+		if(m_FontMax.GetSafeHandle() == NULL)
+			m_FontMax.CreateFontIndirectW(&lf);
+			
+	}
+
 	CRect Rect;
 
 	int woc;
@@ -410,35 +447,6 @@ void CMy102SDlg::ChangeCtrlSize(BOOL bMax)
 	CPoint OldBRPoint, BRPoint; //右下角
 
 	HWND  hwndChild = ::GetWindow(m_hWnd, GW_CHILD);  //列出所有控件 
-
-	//CFont* f = NULL;
-	//
-	//	if (hwndChild) {
-
-	//		CFont* ptf = GetFont(); // 得到原来的字体
-
-	//		LOGFONT lf;
-
-	//		ptf->GetLogFont(&lf);
-
-	//		f = new CFont;
-	//		//f->GetLogFont(&lf);
-	//		f->CreateFont(36, // nHeight
-	//			0, // nWidth
-	//			0, // nEscapement
-	//			0, // nOrientation
-	//			0, // nWeight
-	//			FALSE, // bItalic
-	//			FALSE, // bUnderline
-	//			0, // cStrikeOut
-	//			DEFAULT_CHARSET, // nCharSet
-	//			OUT_DEFAULT_PRECIS, // nOutPrecision
-	//			CLIP_DEFAULT_PRECIS, // nClipPrecision
-	//			DEFAULT_QUALITY, // nQuality
-	//			DEFAULT_PITCH | FF_SWISS, // nPitchAndFamily
-	//			_T("微软雅黑")); // lpszFac
-	//	}
-	//	
 
 	if (hwndChild)
 	{
@@ -470,13 +478,16 @@ void CMy102SDlg::ChangeCtrlSize(BOOL bMax)
 
 		GetDlgItem(woc)->MoveWindow(Rect, TRUE);
 
-		//GetDlgItem(woc)->SetFont(&m_FontMax);
+		if (bMax) {
+
+			GetDlgItem(woc)->SetFont(&m_FontDialogMax);
+		}
+		else
+			GetDlgItem(woc)->SetFont(&m_FontDialog);
 
 		hwndChild = ::GetWindow(hwndChild, GW_HWNDNEXT);
-
 	}
-
-
 	Old = Newp;
+
 
 }

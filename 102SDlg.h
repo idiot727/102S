@@ -59,6 +59,8 @@ public:
 
 	CBrush m_Brush;
 	CBrush m_Brush_white;
+	CFont m_FontDialog;
+	CFont m_FontDialogMax;
 	CFont m_Font;
 	CFont m_FontMax;
 	afx_msg void OnBnClickedButton5();
@@ -68,5 +70,7 @@ public:
 	void ChangeCtrlSize(BOOL bMax);
 
 	CPoint Old;
+
+	BOOL m_bStatus;
 
 };
