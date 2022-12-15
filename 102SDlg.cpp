@@ -29,6 +29,7 @@ void CMy102SDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO1, m_PortNr);
 	DDX_Control(pDX, IDC_BUTTON2, m_OpenCloseCtrl);
 	DDX_Control(pDX, IDC_STATIC8, m_RadarInfo);
+	DDX_Control(pDX, IDC_BUTTON5, m_StartPause);
 }
 
 BEGIN_MESSAGE_MAP(CMy102SDlg, CDialogEx)
@@ -37,9 +38,11 @@ BEGIN_MESSAGE_MAP(CMy102SDlg, CDialogEx)
 
 	ON_BN_CLICKED(IDC_BUTTON2, &CMy102SDlg::OnBnClickedButtonOpenClose)
 	ON_BN_CLICKED(IDC_BUTTON1, &CMy102SDlg::OnBnClickedButtonRefresh)
-	
+
 	ON_WM_TIMER()
 	ON_WM_CTLCOLOR()
+	ON_BN_CLICKED(IDC_BUTTON5, &CMy102SDlg::OnBnClickedButton5)
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
@@ -76,8 +79,8 @@ BOOL CMy102SDlg::OnInitDialog()
 	m_SerialPort.connectReadEvent(this);
 
 
-	m_Font.CreatePointFont(500, _T("Times New Roman"));
-	
+	m_Font.CreatePointFont(400, _T("Times New Roman"));
+
 	m_Brush.CreateSolidBrush(GetSysColor(COLOR_3DFACE));
 
 	m_Brush_white.CreateSolidBrush(RGB(255, 255, 255));
@@ -85,7 +88,17 @@ BOOL CMy102SDlg::OnInitDialog()
 
 	m_RadarInfo.SetWindowTextW(_T(" 0 cm "));
 
-	
+	bConn = FALSE;
+	bShow = FALSE;
+
+	CRect rect;
+
+	GetClientRect(&rect);     //取客户区大小 
+
+	Old.x = rect.right - rect.left;
+
+	Old.y = rect.bottom - rect.top;
+
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -133,6 +146,7 @@ void CMy102SDlg::OnBnClickedButtonOpenClose()
 	{
 		m_SerialPort.close();
 		m_OpenCloseCtrl.SetWindowText(_T("连接"));///设置按钮文字为"打开串口"
+		bConn = FALSE;
 	}
 	///打开串口操作
 	else if (m_PortNr.GetCount() > 0)///当前列表的内容个数
@@ -158,11 +172,13 @@ void CMy102SDlg::OnBnClickedButtonOpenClose()
 		if (m_SerialPort.isOpen())
 		{
 			m_OpenCloseCtrl.SetWindowText(_T("关闭"));
+			bConn = TRUE;
 		}
 		else
 		{
 			m_OpenCloseCtrl.SetWindowText(_T("连接"));
 			AfxMessageBox(_T("串口已被占用！"));
+			bConn = FALSE;
 		}
 	}
 	else
@@ -200,10 +216,10 @@ int CMy102SDlg::onRadarInfo(const char* buffer, int len)
 	char head = 0xaa;
 	if (buffer[0] == head)
 	{
-		
-		short b;
+
+		unsigned short b;
 		size_t size = sizeof(b);
-		memcpy(&b, &buffer[1],size);
+		memcpy(&b, &buffer[1], size);
 		return b;
 	}
 	return 0;
@@ -212,6 +228,10 @@ int CMy102SDlg::onRadarInfo(const char* buffer, int len)
 
 void CMy102SDlg::onReadEvent(const char* portName, unsigned int readBufferLen)
 {
+	if (!bShow) {
+		return;
+	}
+
 	if (readBufferLen > 0)
 	{
 		char* data = new char[readBufferLen + 1]; // '\0'
@@ -286,6 +306,8 @@ HBRUSH CMy102SDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
 
+	//return hbr;
+
 	CWnd* p = NULL;
 
 
@@ -296,25 +318,26 @@ HBRUSH CMy102SDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	CRect rc;
 	if (pWnd->GetDlgCtrlID() == IDC_STATIC8)
 	{
-		
+
 		pDC->SetTextColor(RGB(0, 0, 0));//
 		pDC->SetBkColor(RGB(255, 255, 255));//
 		pDC->SelectObject(&m_Font);//文字为初始化文字
 
 		//m_Brush_white.DeleteObject();
 		//m_Brush_white.CreateSolidBrush(RGB(0,0,0));
-		
+
+
 		return m_Brush;
 
 	}
 
 	if (pWnd->GetDlgCtrlID() == IDC_STATIC6)
 	{
-		
+
 		pDC->SetTextColor(RGB(0, 0, 0));//
 		pDC->SetBkColor(RGB(255, 255, 255));//
 		//p = pWnd->GetDlgItem(IDC_STATIC6);
-		
+
 		pWnd->GetClientRect(&rc);
 		pDC->FillSolidRect(rc, RGB(255, 255, 255));
 
@@ -322,4 +345,138 @@ HBRUSH CMy102SDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 	}
 	return hbr;
+}
+
+
+void CMy102SDlg::OnBnClickedButton5()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	if (!bShow&&bConn) {
+		this->m_StartPause.SetWindowTextW(_T("暂停"));
+		bShow = TRUE;
+	}
+	else if(bShow){
+		bShow = FALSE;
+		this->m_StartPause.SetWindowTextW(_T("开始"));
+	}
+}
+
+
+void CMy102SDlg::OnSize(UINT nType, int cx, int cy)
+{
+	__super::OnSize(nType, cx, cy);
+	return;
+
+	if (nType == SIZE_RESTORED){ 
+		ChangeCtrlSize(0);
+		//this->ChangeSize(cx, cy);
+	}
+	if (nType == SIZE_MAXIMIZED) {
+		ChangeCtrlSize(1);
+	}
+
+
+
+	// TODO: 在此处添加消息处理程序代码
+}
+
+
+void CMy102SDlg::ChangeCtrlSize(BOOL bMax)
+{
+	// TODO: 在此处添加实现代码.
+
+	float fsp[2];
+
+	POINT Newp; //获取现在对话框的大小
+
+	CRect recta;
+
+	GetClientRect(&recta);     //取客户区大小 
+
+	Newp.x = recta.right - recta.left;
+
+	Newp.y = recta.bottom - recta.top;
+
+	fsp[0] = (float)Newp.x / Old.x;
+
+	fsp[1] = (float)Newp.y / Old.y;
+
+	CRect Rect;
+
+	int woc;
+
+	CPoint OldTLPoint, TLPoint; //左上角
+
+	CPoint OldBRPoint, BRPoint; //右下角
+
+	HWND  hwndChild = ::GetWindow(m_hWnd, GW_CHILD);  //列出所有控件 
+
+	//CFont* f = NULL;
+	//
+	//	if (hwndChild) {
+
+	//		CFont* ptf = GetFont(); // 得到原来的字体
+
+	//		LOGFONT lf;
+
+	//		ptf->GetLogFont(&lf);
+
+	//		f = new CFont;
+	//		//f->GetLogFont(&lf);
+	//		f->CreateFont(36, // nHeight
+	//			0, // nWidth
+	//			0, // nEscapement
+	//			0, // nOrientation
+	//			0, // nWeight
+	//			FALSE, // bItalic
+	//			FALSE, // bUnderline
+	//			0, // cStrikeOut
+	//			DEFAULT_CHARSET, // nCharSet
+	//			OUT_DEFAULT_PRECIS, // nOutPrecision
+	//			CLIP_DEFAULT_PRECIS, // nClipPrecision
+	//			DEFAULT_QUALITY, // nQuality
+	//			DEFAULT_PITCH | FF_SWISS, // nPitchAndFamily
+	//			_T("微软雅黑")); // lpszFac
+	//	}
+	//	
+
+	if (hwndChild)
+	{
+		//m_FontMax.CreatePointFont(510, _T("Times New Roman"));
+	}
+
+	while (hwndChild)
+
+	{
+		woc = ::GetDlgCtrlID(hwndChild);//取得ID
+
+		GetDlgItem(woc)->GetWindowRect(Rect);
+
+		ScreenToClient(Rect);
+
+		OldTLPoint = Rect.TopLeft();
+
+		TLPoint.x = long(OldTLPoint.x * fsp[0]);
+
+		TLPoint.y = long(OldTLPoint.y * fsp[1]);
+
+		OldBRPoint = Rect.BottomRight();
+
+		BRPoint.x = long(OldBRPoint.x * fsp[0]);
+
+		BRPoint.y = long(OldBRPoint.y * fsp[1]);
+
+		Rect.SetRect(TLPoint, BRPoint);
+
+		GetDlgItem(woc)->MoveWindow(Rect, TRUE);
+
+		//GetDlgItem(woc)->SetFont(&m_FontMax);
+
+		hwndChild = ::GetWindow(hwndChild, GW_HWNDNEXT);
+
+	}
+
+
+	Old = Newp;
+
 }

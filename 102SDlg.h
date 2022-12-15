@@ -50,6 +50,8 @@ public:
 	
 
 	CButton m_OpenCloseCtrl;
+	BOOL bConn;
+	BOOL bShow;
 
 	CSerialPort m_SerialPort;
 	CStatic m_RadarInfo;
@@ -58,4 +60,13 @@ public:
 	CBrush m_Brush;
 	CBrush m_Brush_white;
 	CFont m_Font;
+	CFont m_FontMax;
+	afx_msg void OnBnClickedButton5();
+	CButton m_StartPause;
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+
+	void ChangeCtrlSize(BOOL bMax);
+
+	CPoint Old;
+
 };

@@ -6,7 +6,11 @@
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
 #define IDD_MY101M_DIALOG               102
+#define IDS_STRING102                   102
 #define IDD_MY102S_DIALOG               103
+#define IDS_STRING103                   103
+#define IDS_STRING104                   104
+#define IDS_STRING105                   105
 #define IDI_ICON2                       128
 #define IDI_ICON1                       130
 #define IDR_MAINFRAME                   131
