@@ -1,4 +1,5 @@
-﻿  102SDlg.cpp
+﻿  102S.cpp
+  102SDlg.cpp
 E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(70,77): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
 E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(71,82): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
 E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(90,17): warning C4244: “*=”: 从“double”转换到“LONG”，可能丢失数据
@@ -9,4 +10,5 @@ E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(429,23): warning C4244: “*=”: 从�
 E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(430,23): warning C4244: “*=”: 从“float”转换到“LONG”，可能丢失数据
 E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(434,23): warning C4244: “*=”: 从“float”转换到“LONG”，可能丢失数据
 E:\private\JGDZ\101-Dis\102S\102SDlg.cpp(435,23): warning C4244: “*=”: 从“float”转换到“LONG”，可能丢失数据
+  正在生成代码...
   102S.vcxproj -> E:\private\JGDZ\101-Dis\102S\x64\Debug\102S.exe
